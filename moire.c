@@ -209,24 +209,20 @@ void move_moire() {
 		if (moire[i].x >= screen->w / 2) {
 			
 			moire[i].dx = -moire[i].dx;
-			moire[i].dy = -moire[i].dy;
 		}
 	
 		if (moire[i].x <= -screen->w / 2) {
 			
 			moire[i].dx = -moire[i].dx;
-			moire[i].dy = -moire[i].dy;
 		}
 		
 		if (moire[i].y >= screen->h / 2) {
 			
-			moire[i].dx = -moire[i].dx;
 			moire[i].dy = -moire[i].dy;
 		}
 		
 		if (moire[i].y <= -screen->h / 2) {
 			
-			moire[i].dx = -moire[i].dx;
 			moire[i].dy = -moire[i].dy;
 		}
 		
@@ -262,21 +258,6 @@ int main() {
 	}
 
 	SDL_SetAlpha(screen, SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
-
-	//Load Texture
-	SDL_Surface *temp;
-
-	// load tex and convert to screen bit depth;
-	temp = SDL_LoadBMP("tunnel.bmp");
-	texture = SDL_DisplayFormat(temp);
-
-	if (texture == NULL) {
-		
-		printf("Unable to load bitmap.\n");
-		return 1;
-	}
-	
-	SDL_FreeSurface(temp);
 
 	Uint32 next_game_tick = SDL_GetTicks();
 	int sleep = 0;
