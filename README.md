@@ -6,7 +6,6 @@ SDL(1.2) is used for graphics.
 compiltion on linux systems
 `gcc source_file.c -lSDL -lm -o appname`
 
-
 ## Controls
 * ESC to exit
 
@@ -28,5 +27,8 @@ Sine Scroller
 
 Moire effect
 ![moire](http://i.imgur.com/bMnEu4l.png)
+
+Rotozoom effect
+![moire](http://i.imgur.com/DmlaYty.gif)
 
 
