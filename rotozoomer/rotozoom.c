@@ -151,9 +151,16 @@ int init(int width, int height) {
 	
 	//load image into surface
 	SDL_Surface* tmp = SDL_LoadBMP("smile.bmp");
+	
+	if (tmp == NULL) { 
+		
+		printf ("coild not load image file SDL_Error: %s\n", SDL_GetError());
+		
+		return 1;
+	}
+
 	source = SDL_ConvertSurfaceFormat(tmp, SDL_PIXELFORMAT_RGBA8888, 0);
 	SDL_FreeSurface(tmp);
-
 
 	if (window == NULL) { 
 		
