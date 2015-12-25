@@ -12,11 +12,6 @@ static SDL_Surface *screen;
 int fire_array[SCREEN_WIDTH][SCREEN_HEIGHT];
 SDL_Color colours[256];
 
-int blobx = 100;
-int bloby = 100;
-int dx = 1;
-int dy = 2;
-
 //init palette
 void init_palette() {
 	
@@ -223,33 +218,6 @@ void draw_background () {
 	SDL_FillRect(screen,&src,0);
 }
 
-//draw_blob
-void draw_blob(int x, int y) {
-
-	fire_array[x][y] = 255;
-	fire_array[x][y+1] = 255;
-	fire_array[x+1][y] = 255;
-	fire_array[x+1][y+1] = 255;
-}
-
-//move blob
-void move_blob() {
-	
-	blobx += dx;	
-	bloby += dy;
-
-	if (blobx < 0 || blobx > SCREEN_WIDTH - 3) {
-			
-		dx = -dx;
-	}
-
-	if (bloby < 0 || bloby > SCREEN_HEIGHT - 3) {
-			
-		dy = -dy;
-	}
-
-}
-
 //draw_fire
 void draw_fire() {
 	
@@ -409,8 +377,6 @@ int main() {
 		}
 	
 		//draw_background();
-		draw_blob(blobx,bloby);
-		move_blob();
 		draw_fire();
 		move_fire();
 

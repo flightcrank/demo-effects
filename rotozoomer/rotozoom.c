@@ -6,8 +6,11 @@
 #include "vector.h"
 
 //Screen dimension constants
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 1080
+#define SCREEN_HEIGHT 720
+
+#define ROTO_WIDTH 256
+#define ROTO_HEIGHT 256
 
 int init(int width, int height);
 void draw_pixel(int x, int y, Uint32);
@@ -17,6 +20,7 @@ SDL_Window* window = NULL;	//The window we'll be rendering to
 SDL_Renderer* renderer;		//The renderer SDL will use to draw to the screen
 SDL_Texture* screen;		//The texture representing the screen	
 Uint32* pixels = NULL;		//The pixel buffer to draw to
+SDL_Texture* roto;		//The texture representing the rotozoomed image	
 SDL_Surface* source;		//A source image
     
 int main (int argc, char* args[]) {
@@ -40,6 +44,18 @@ int main (int argc, char* args[]) {
 		sin_t[i] =  sin(i * M_PI / 180);
 	}
 	
+	SDL_Rect src, dest;
+
+	src.x = 0;
+	src.y = 0;
+	src.w = ROTO_WIDTH;
+	src.h = ROTO_HEIGHT;
+	
+	dest.x = SCREEN_WIDTH / 2 - SCREEN_WIDTH / 2;
+	dest.y = SCREEN_HEIGHT / 2 - SCREEN_WIDTH / 2;
+	dest.w = SCREEN_WIDTH;
+	dest.h = SCREEN_WIDTH;
+
 
 	//render loop
 	while(quit == 0) {
@@ -54,22 +70,16 @@ int main (int argc, char* args[]) {
 			quit = 1;
 		}
 		
-		int x,y;
-		
-		int w = 480;
-		int h = 480;
-		
-		int obj_xoffset = w / 2;
-		int obj_yoffset = h / 2;
-		
-		struct vector2d obj_translate = {-w / 2, -h / 2};
-		struct vector2d screen_translate = {w / 2, h / 2};
+		struct vector2d obj_translate = {-ROTO_WIDTH / 2, -ROTO_HEIGHT / 2};
+		struct vector2d screen_translate = {ROTO_WIDTH / 2, ROTO_HEIGHT / 2};
 		
 		d += 1;
+		
+		int x,y;
 
-		for (x = 0; x < w; x++) {
+		for (x = 0; x < ROTO_WIDTH; x++) {
 			
-			for (y = 0; y < h; y++) {
+			for (y = 0; y < ROTO_HEIGHT; y++) {
 				
 				struct vector2d r = {x, y};
 				
@@ -88,21 +98,23 @@ int main (int argc, char* args[]) {
 					r.x = fabs(r.x);
 				}
 
-				float u = (float) r.x / w * fabs(sin_t[index] * 10);
-				float v = (float) r.y / h * fabs(sin_t[index] * 10);
+				float u = (float) r.x / ROTO_WIDTH * fabs(sin_t[index] * 7);
+				float v = (float) r.y / ROTO_HEIGHT * fabs(sin_t[index] * 7);
 				u = (int) (u * source->w) % source->w;
 				v = (int) (v * source->h) % source->h;
 				
 				Uint32 c = get_pixel(u, v);
-				draw_pixel((SCREEN_WIDTH / 2 - obj_xoffset) + x, (SCREEN_HEIGHT / 2 - obj_yoffset) + y, c);
+				draw_pixel(x, y, c);
 			}
 		}
 
-		SDL_UpdateTexture(screen, NULL, pixels, SCREEN_WIDTH * sizeof (Uint32));
+		//SDL_UpdateTexture(screen, NULL, pixels, SCREEN_WIDTH * sizeof (Uint32));
+		
+		SDL_UpdateTexture(roto, NULL, pixels, ROTO_WIDTH * sizeof (Uint32));
 
 		//draw to the screen
 		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, screen, NULL, NULL);
+		SDL_RenderCopy(renderer, roto, &src, &dest);
 		SDL_RenderPresent(renderer);
 				
 		//time it takes to render 1 frame in milliseconds
@@ -146,8 +158,11 @@ int init(int width, int height) {
 	//set up screen texture
 	screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
 	
+	//set up screen texture
+	roto = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ROTO_WIDTH, ROTO_HEIGHT);
+	
 	//allocate pixel buffer
-	pixels = (Uint32*) malloc((SCREEN_WIDTH * SCREEN_HEIGHT) * sizeof(Uint32));
+	pixels = (Uint32*) malloc((ROTO_WIDTH * ROTO_HEIGHT) * sizeof(Uint32));
 	
 	//load image into surface
 	SDL_Surface* tmp = SDL_LoadBMP("smile.bmp");
@@ -165,6 +180,13 @@ int init(int width, int height) {
 	if (window == NULL) { 
 		
 		printf ("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		
+		return 1;
+	}
+
+	if (roto == NULL) { 
+		
+		printf ("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
 		
 		return 1;
 	}
@@ -195,7 +217,7 @@ int init(int width, int height) {
 
 void draw_pixel(int x, int y, Uint32 c) {
 	
-	Uint32 position = y * SCREEN_WIDTH + x;
+	Uint32 position = y * ROTO_WIDTH + x;
 	pixels[position] = c;
 }
 
