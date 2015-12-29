@@ -98,8 +98,8 @@ int main (int argc, char* args[]) {
 					r.x = fabs(r.x);
 				}
 
-				float u = (float) r.x / ROTO_WIDTH * fabs(sin_t[index] * 7);
-				float v = (float) r.y / ROTO_HEIGHT * fabs(sin_t[index] * 7);
+				float u = (float) r.x / ROTO_WIDTH  * fabs(sin_t[index]) * 5;
+				float v = (float) r.y / ROTO_HEIGHT * fabs(sin_t[index]) * 5;
 				u = (int) (u * source->w) % source->w;
 				v = (int) (v * source->h) % source->h;
 				
