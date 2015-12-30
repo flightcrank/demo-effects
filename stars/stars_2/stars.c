@@ -19,7 +19,7 @@ void init_stars(struct star s[], int width, int height) {
 		s[i].location.z = (float) (rand() % 100 + 50) / 100;
 		s[i].location.x *= width / 2;
 		s[i].location.y *= height / 2;
-		s[i].location.z *= 3;
+		s[i].location.z *= Z_DEPTH;
 		s[i].dest.x = 0;
 		s[i].dest.y = 0;
 		s[i].dest.w = 1;
@@ -40,11 +40,29 @@ void draw_stars(SDL_Renderer* r, SDL_Texture* t, struct star s[]) {
 
 	for (i = 0; i < NUM_STARS; i++) {
 		
-		float inv = 2 - s[i].location.z;
-		float inter = inv / 2;
+		float depth = 1;
 
-		s[i].dest.w = inter * 5;
-		s[i].dest.h = inter * 5;
+		if (s[i].location.z <= depth) {
+			
+			float inv = depth - s[i].location.z;
+			float inter = inv / depth;
+
+			if (inter < .2) {
+				
+				s[i].dest.w = 1;
+				s[i].dest.h = 1;
+			
+			} else {
+
+				s[i].dest.w = inter * 5;
+				s[i].dest.h = inter * 5;
+			}
+		
+		} else {
+		
+			s[i].dest.w = 1;
+			s[i].dest.h = 1;
+		}
 		
 		SDL_RenderCopy(r, t, &src, &s[i].dest);
 	}

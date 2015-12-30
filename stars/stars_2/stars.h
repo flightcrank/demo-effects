@@ -7,6 +7,7 @@
 #include "renderer.h"
 
 #define NUM_STARS 1000
+#define Z_DEPTH 3
 
 struct star {
 	
