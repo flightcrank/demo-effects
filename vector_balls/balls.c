@@ -11,38 +11,38 @@
 
 void init_vector_balls(struct vector3d ball[]) {
 	
-	ball[0].x = -1;
-	ball[0].y = -1;
-	ball[0].z = -1;
-	ball[1].x = -1;
-	ball[1].y = -1;
-	ball[1].z = 1;
-	ball[2].x = 1;
-	ball[2].y = -1;
-	ball[2].z = 1;
-	ball[3].x = 1;
-	ball[3].y = -1;
-	ball[3].z = -1;
-	ball[4].x = -1;
-	ball[4].y = 1;
-	ball[4].z = -1;
-	ball[5].x = -1;
-	ball[5].y = 1;
-	ball[5].z = 1;
-	ball[6].x = 1;
-	ball[6].y = 1;
-	ball[6].z = 1;
-	ball[7].x = 1;
-	ball[7].y = 1;
-	ball[7].z = -1;
+	ball[0].x = -.5;
+	ball[0].y = -.5;
+	ball[0].z = -.5;
+	ball[1].x = .5;
+	ball[1].y = -.5;
+	ball[1].z = -.5;
+	ball[2].x = -.5;
+	ball[2].y = .5;
+	ball[2].z = -.5;
+	ball[3].x = .5;
+	ball[3].y = .5;
+	ball[3].z = -.5;
+	ball[4].x = -.5;
+	ball[4].y = -.5;
+	ball[4].z = .5;
+	ball[5].x = .5;
+	ball[5].y = -.5;
+	ball[5].z = .5;
+	ball[6].x = -.5;
+	ball[6].y = .5;
+	ball[6].z = .5;
+	ball[7].x = .5;
+	ball[7].y = .5;
+	ball[7].z = .5;
 }
 
 void draw_vector_balls(SDL_Renderer* r, SDL_Texture* t, struct vector3d ball[], int size, int width, int height) {
 	
 	SDL_Rect  dest;
 
-	dest.w = 30;
-	dest.h = 30;
+	dest.w = 20;
+	dest.h = 20;
 
 	int i;
 
@@ -57,6 +57,27 @@ void draw_vector_balls(SDL_Renderer* r, SDL_Texture* t, struct vector3d ball[], 
 		multiply_vector(&world, 100);
 		add_vector(&world, &screen_translate);
 		
+		float inv = 400 - world.z;
+		float interp = inv / 342;
+
+		dest.w = 30 * interp;
+		dest.h = 30 * interp;
+		
+		/*
+
+		if (i == 0) {
+			
+			dest.w = 30;
+			dest.h = 30;
+			printf("z = %.1f\n", world.z);
+		
+		} else {
+		
+			dest.w = 20;
+			dest.h = 20;
+		}
+		*/
+
 		dest.x = world.x;
 		dest.y = world.y;
 		
