@@ -138,6 +138,7 @@ int main (int argc, char* args[]) {
 	smooth_buffer(&cool);
 	smooth_buffer(&cool);
 	smooth_buffer(&cool);
+	smooth_buffer(&cool);
 
 	int offset = 0;
 
@@ -177,7 +178,7 @@ int main (int argc, char* args[]) {
 			for (y = 0; y < fire.height; y++) {
 				
 				Uint32 val = get_pixel(&fire, x, y);
-				Uint32 cool_val = get_pixel(&cool, x, offset % cool.height);
+				Uint32 cool_val = get_pixel(&cool, x, (y + offset) % cool.height);
 
 				if (cool_val == 0) {
 					
@@ -195,7 +196,7 @@ int main (int argc, char* args[]) {
 
 		}
 		
-		offset++;
+		offset += 1;
 
 		//draw to the screen buffer	
 		for (x = 0; x < pb.width; x++) {
