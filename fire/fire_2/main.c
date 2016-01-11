@@ -17,11 +17,43 @@ int init(int width, int height);
 
 SDL_Window* window = NULL;		//The window we'll be rendering to
 SDL_Renderer *renderer;			//The renderer SDL will use to draw to the screen
-SDL_Texture *colour_map;		//The texture representing the title message	
+SDL_Texture *colour_map;		//The texture representing the color pallet	
+SDL_Texture *cool_map;			//The texture representing the cool	
 SDL_Texture *screen;			//The texture representing the screen
 struct pixel_buffer pb;			//the structure that holds the pixel buffer for screen	
-struct pixel_buffer fire;		//the structure that holds the pixel buffer for screen	
-struct pixel_buffer cm;			//the structure that holds the pixel buffer for screen	
+struct pixel_buffer fire;		//the structure that holds the pixel buffer for fire	
+struct pixel_buffer cm;			//the structure that holds the pixel buffer for color pallet	
+struct pixel_buffer cool;		//the structure that holds the pixel buffer for cool map	
+
+void smooth_buffer(struct pixel_buffer* pix) {
+
+	int x,y;
+	
+	for (x = 0; x < pix->width; x++) {
+		
+		for (y = 0; y < pix->height; y++) {
+			
+			int left = (x - 1) % pix->width;
+			int right = (x + 1) % pix->width;
+			int up 	= (y - 1) % pix->height;
+			int down = (y + 1) % pix->height;
+
+			if (left < 0) {
+				
+				left = left + pix->width;
+			}
+			
+			if (up < 0) {
+				
+				up = up + pix->height;
+			}
+
+			Uint32 val = (get_pixel(pix, x, up) + get_pixel(pix, x, down) + get_pixel(pix, left, y) + get_pixel(pix, right, y)) / 4;
+			
+			draw_pixel(pix, x, y, val);
+		}
+	}
+}
 
 int main (int argc, char* args[]) {
 	
@@ -39,6 +71,7 @@ int main (int argc, char* args[]) {
 	clear_pixels(&cm, 0);
 	clear_pixels(&pb, 0);
 	clear_pixels(&fire, 0);
+	clear_pixels(&cool, 0);
 
 	Uint8 r = 255, g = 255, b = 255;
 	int i;
@@ -79,8 +112,35 @@ int main (int argc, char* args[]) {
 	}
 	
 	SDL_UpdateTexture(colour_map, NULL, cm.pixels, cm.width * sizeof (Uint32));
-
 	
+	for (i = 0; i < 10000; i++) {
+	
+		int x = rand() % cool.width;
+		int y = rand() % cool.height;
+
+		draw_pixel(&cool, x, y, 255);
+	}
+	
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+	smooth_buffer(&cool);
+
+	int offset = 0;
+
 	//render loop
 	while(quit == 0) {
 	
@@ -104,36 +164,12 @@ int main (int argc, char* args[]) {
 			draw_pixel(&fire, x, y, 255);
 		}
 
-		
 		draw_circle(&fire, 100, 100, 5, 255);
 		
 		//heat spread smoothing
-		int x,y;
+		smooth_buffer(&fire);
 		
-		for (x = 0; x < fire.width; x++) {
-			
-			for (y = 0; y < fire.height; y++) {
-				
-				int left = (x - 1) % fire.width;
-				int right = (x + 1) % fire.width;
-				int up 	= (y - 1) % fire.height;
-				int down = (y + 1) % fire.height;
-
-				if (left < 0) {
-					
-					left = left + fire.width;
-				}
-				
-				if (up < 0) {
-					
-					up = up + fire.height;
-				}
-
-				Uint32 val = (get_pixel(&fire, x, up) + get_pixel(&fire, x, down) + get_pixel(&fire, left, y) + get_pixel(&fire, right, y)) / 4;
-				
-				draw_pixel(&fire, x, y, val);
-			}
-		}
+		int x,y;
 
 		//cooling
 		for (x = 0; x < fire.width; x++) {
@@ -141,13 +177,25 @@ int main (int argc, char* args[]) {
 			for (y = 0; y < fire.height; y++) {
 				
 				Uint32 val = get_pixel(&fire, x, y);
-				
-				if (val > 3) {
+				Uint32 cool_val = get_pixel(&cool, x, offset % cool.height);
+
+				if (cool_val == 0) {
 					
-					draw_pixel(&fire, x, y - 1, val - rand() % 3);
+					cool_val = rand() % 3;
 				}
+
+				int res = val - cool_val;
+
+				if (res > 0) {
+					
+					draw_pixel(&fire, x, y - 1, res);
+				}
+				
 			}
+
 		}
+		
+		offset++;
 
 		//draw to the screen buffer	
 		for (x = 0; x < pb.width; x++) {
@@ -213,6 +261,9 @@ int init(int width, int height) {
 	//set up 
 	colour_map = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 1);
 	
+	//set up 
+	cool_map = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	
 	//set up colour_map ball pixel buffer
 	create_renderer(&cm, 256, 1);
 	
@@ -221,6 +272,9 @@ int init(int width, int height) {
 	
 	//set up fire pixel buffer
 	create_renderer(&fire, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	
+	//set up cool map pixel buffer
+	create_renderer(&cool, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	
 	
 	if (window == NULL) { 
@@ -231,6 +285,20 @@ int init(int width, int height) {
 	}
 	
 	if (screen == NULL) { 
+		
+		printf ("texture could not be created! SDL_Error: %s\n", SDL_GetError());
+		
+		return 1;
+	}
+	
+	if (colour_map == NULL) { 
+		
+		printf ("texture could not be created! SDL_Error: %s\n", SDL_GetError());
+		
+		return 1;
+	}
+	
+	if (cool_map == NULL) { 
 		
 		printf ("texture could not be created! SDL_Error: %s\n", SDL_GetError());
 		
@@ -252,6 +320,13 @@ int init(int width, int height) {
 	}
 	
 	if (fire.pixels == NULL) {
+		
+		printf ("pixel buffer could not be created!");
+		
+		return 1;
+	}
+	
+	if (cool.pixels == NULL) {
 		
 		printf ("pixel buffer could not be created!");
 		
