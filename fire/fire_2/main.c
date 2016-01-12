@@ -160,7 +160,7 @@ int main (int argc, char* args[]) {
 			
 			//random y and x values
 			int x = rand() % fire.width;
-			int y = rand() % 10 + fire.height - 10;
+			int y = rand() % 2 + fire.height - 2;
 
 			draw_pixel(&fire, x, y, 255);
 		}
@@ -196,7 +196,7 @@ int main (int argc, char* args[]) {
 
 		}
 		
-		offset += 1;
+		offset += 3;
 
 		//draw to the screen buffer	
 		for (x = 0; x < pb.width; x++) {
