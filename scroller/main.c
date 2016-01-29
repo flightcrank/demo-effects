@@ -58,20 +58,10 @@ int main (int argc, char* args[]) {
 		
 		return 0;
 	}
-	
-	struct vector3d v = get_char('j');
+
+	char msg[] = "this is a test string";
 
 	SDL_Rect src, dest;
-
-	src.x = v.x;
-	src.y = v.y;
-	src.w = CHAR_WIDTH;
-	src.h = CHAR_WIDTH;
-
-	dest.x = SCREEN_WIDTH / 2 - CHAR_WIDTH*2 / 2;
-	dest.y = SCREEN_HEIGHT / 2 - CHAR_HEIGHT*2 / 2;
-	dest.w = CHAR_WIDTH * 2;
-	dest.h = CHAR_HEIGHT * 2;
 
 	int sleep = 0;
 	int quit = 0;
@@ -84,6 +74,9 @@ int main (int argc, char* args[]) {
 		
 		sin_t[i] =  sin(i * M_PI / 180);
 	}
+	
+	int c_offset = 0;
+	int d = 1;
 
 	//render loop
 	while(quit == 0) {
@@ -98,11 +91,42 @@ int main (int argc, char* args[]) {
 			quit = 1;
 		}
 		
-		//SDL_UpdateTexture(roto, NULL, pixels, ROTO_WIDTH * sizeof (Uint32));
+		SDL_RenderClear(renderer);
+		
+		for (i = 0; i < strlen(msg); i++) {
+			
+			struct vector3d v = get_char(msg[i]);
+			
+			if (msg[i] == ' ') {
+				
+				c_offset += CHAR_WIDTH;
+				continue;
+			}
+
+			src.x = v.x;
+			src.y = v.y;
+			src.w = CHAR_WIDTH;
+			src.h = CHAR_WIDTH;
+	
+			dest.x = c_offset;
+			dest.y = SCREEN_HEIGHT / 2 + sin_t[(int) fabs(c_offset) % 360] * 25;
+			dest.w = CHAR_WIDTH;
+			dest.h = CHAR_HEIGHT;
+			
+			SDL_RenderCopy(renderer, c_map, &src, &dest);
+			
+			c_offset += CHAR_WIDTH;
+		}
+
+		if (d > strlen(msg) * CHAR_WIDTH + SCREEN_WIDTH) {
+			
+			d = 0;
+		}
+
+		c_offset = SCREEN_WIDTH - d;
+		d += 5;
 
 		//draw to the screen
-		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, c_map, &src, &dest);
 		SDL_RenderPresent(renderer);
 				
 		//time it takes to render 1 frame in milliseconds
