@@ -62,9 +62,9 @@ int main (int argc, char *args[]) {
 		
 		int i;
 		
-		for (i = 0; i < height; i++) {
+		for (i = 0; i < twist_pb.height; i++) {
 			
-			float v = (float) i / height;
+			float v = (float) i / twist_pb.height;
 			v *= 2;
 						
 			points[0].x = 100 + (sin(a + v) * 60);
