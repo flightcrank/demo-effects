@@ -1,29 +1,12 @@
 
 //renderer.c
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "renderer.h"
 
-void draw_circle(struct pixel_buffer* pb, int x1, int y1, float radius, uint32_t colour) {
-	
-	int x, y;
+int draw_line(struct pix_buff *pb, int x1, int y1, int x2, int y2, uint32_t colour) {
 
-	for (x = 0; x < pb->width; x++) {
-		
-		for (y = 0; y < pb->height; y++) {
-			
-			int a = x1 - x;
-			int b = y1 - y;
-			float c = sqrt(pow(a, 2) + pow(b, 2));
-			
-			if (c < radius) {
-				
-				draw_pixel(pb, x, y, colour);
-			}
-		}
-	}
-}
-
-int draw_line(struct pixel_buffer* pb, int x1, int y1, int x2, int y2, uint32_t colour) {
 
 	//plot the first point
 	draw_pixel(pb, x1, y1, colour);
@@ -100,8 +83,6 @@ int draw_line(struct pixel_buffer* pb, int x1, int y1, int x2, int y2, uint32_t 
 				}
 			}
 		}
-
-
 	}
 
 	//the length of the line is greater along the Y axis
@@ -165,7 +146,7 @@ int draw_line(struct pixel_buffer* pb, int x1, int y1, int x2, int y2, uint32_t 
 	return 0;	
 }
 
-int draw_pixel(struct pixel_buffer* pb, int x, int y, uint32_t colour) {
+int draw_pixel(struct pix_buff *pb, int x, int y, uint32_t colour) {
 	
 	//dont draw any pixels that are outside of the pixel buffer
 	if (x < 0 || y < 0) {
@@ -185,7 +166,28 @@ int draw_pixel(struct pixel_buffer* pb, int x, int y, uint32_t colour) {
 	return 0;
 }
 
-void clear_pixels(struct pixel_buffer* pb, uint32_t colour) {
+void draw_circle(struct pix_buff *pb, int x1, int y1, float radius, uint32_t colour) {
+	
+	int x, y;
+
+	for (x = 0; x < pb->width; x++) {
+		
+		for (y = 0; y < pb->height; y++) {
+			
+			int a = x1 - x;
+			int b = y1 - y;
+			float c = sqrt(pow(a, 2) + pow(b, 2));
+			
+			if (c < radius) {
+				
+				draw_pixel(pb, x, y, colour);
+			}
+		}
+	}
+}
+
+
+void clear_pixels(struct pix_buff *pb, uint32_t colour) {
 
 	int i = 0;
 	int buffer_size = pb->width * pb->height;
@@ -196,13 +198,47 @@ void clear_pixels(struct pixel_buffer* pb, uint32_t colour) {
 	}
 }
 
-void create_renderer(struct pixel_buffer* pb, int w, int h) {
+void xor_texture(struct pix_buff *pb, int width, int height) {
 	
-	pb->pixels = NULL;
-	pb->width = w;
-	pb->height = h;
+	int x, y;
 	
-	//allocate pixel buffer
-	pb->pixels = (uint32_t*) malloc((w * h) * sizeof(uint32_t));
+	for(y = 0; y < pb->height; y++) {
+		
+		for(x = 0; x < pb->width; x++) {
+			
+			uint8_t c = x ^ y;
+			
+			uint32_t pix = 0;
+			
+			pix = pix | c;	//red
+			pix = pix << 8;
+			pix = pix | c; //green
+			pix = pix << 8;
+			pix = pix | c;	//blue
+			pix = pix << 8;
+			pix = pix | 255; // alpha
+			
+			draw_pixel(pb, x, y, pix);
+		}
+	}
 }
 
+int create_pixel_buffer(struct pix_buff *pb, int width, int height) {
+	
+	pb->width = width;
+	pb->height = height;
+	pb->pixels = NULL;
+	pb->pixels = calloc((width * height), sizeof(uint32_t));
+	
+	if (pb->pixels == NULL) {
+		
+		return 1;
+	}
+	
+	return 0;
+}
+
+void free_pixel_buffer(struct pix_buff *pb) {
+
+	free(pb->pixels);
+}
